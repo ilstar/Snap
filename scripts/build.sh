@@ -44,6 +44,6 @@ if [[ "$signing_identity" != "-" ]]; then
     # Hardened runtime and a secure timestamp are required for notarization.
     sign_options=(--options runtime --timestamp)
 fi
-codesign --force --sign "$signing_identity" --identifier com.fred.snap "${sign_options[@]}" "$bundle"
+codesign --force --sign "$signing_identity" --identifier com.github.ilstar.snap "${sign_options[@]}" "$bundle"
 codesign --verify --deep --strict "$bundle"
 print "Built $bundle"

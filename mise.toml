@@ -1,0 +1,26 @@
+[tasks.build]
+description = "Build and sign build/Snap.app (pass `release` for an optimized build)"
+run = "scripts/build.sh"
+
+[tasks.open]
+description = "Build and launch Snap"
+depends = ["build"]
+run = "open build/Snap.app"
+
+[tasks.test]
+description = "Run unit tests"
+run = "swift test"
+
+[tasks.release]
+description = "Build, notarize, and staple build/Snap-<version>.zip"
+run = "scripts/release.sh"
+
+[tasks.publish]
+description = "Notarize and publish a GitHub release for the Info.plist version"
+depends = ["release"]
+run = '''
+#!/bin/zsh
+set -euo pipefail
+version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' Resources/Info.plist)"
+gh release create "v$version" "build/Snap-$version.zip" --target main --title "Snap $version" --generate-notes
+'''

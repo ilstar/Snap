@@ -10,14 +10,15 @@ Choose **Check for Updates…** from the menu bar icon to compare your version w
 
 ## Build and run
 
+Tasks run through [mise](https://mise.jdx.dev):
+
 ```sh
-./scripts/build.sh
-open build/Snap.app
+mise run open
 ```
 
-Open `Package.swift` in Xcode to edit the project. For an optimized local bundle, run `./scripts/build.sh release`. Run tests with `swift test`.
+`mise run build` builds and signs `build/Snap.app`; `mise run open` builds and launches it. For an optimized local bundle, run `mise run build release`. Run tests with `mise run test`. Open `Package.swift` in Xcode to edit the project.
 
-Quit Snap before rebuilding. The build script selects a unique Developer ID Application identity, or a unique Apple Development identity if no Developer ID is available. Set `SNAP_SIGNING_IDENTITY` to a specific certificate name or SHA-1 to select it explicitly. Keep the same identity across builds. The script fails if no identity is available or the selection is ambiguous. `SNAP_SIGNING_IDENTITY=- ./scripts/build.sh` explicitly opts into disposable ad-hoc builds.
+Quit Snap before rebuilding. The build script selects a unique Developer ID Application identity, or a unique Apple Development identity if no Developer ID is available. Set `SNAP_SIGNING_IDENTITY` to a specific certificate name or SHA-1 to select it explicitly. Keep the same identity across builds. The script fails if no identity is available or the selection is ambiguous. `SNAP_SIGNING_IDENTITY=- mise run build` explicitly opts into disposable ad-hoc builds.
 
 ## Setup
 
@@ -72,6 +73,6 @@ Store notarization credentials once (use an [app-specific password](https://supp
 xcrun notarytool store-credentials snap-notary --apple-id <apple-id> --team-id <team-id>
 ```
 
-Bump `CFBundleShortVersionString` and `CFBundleVersion` in `Resources/Info.plist`, quit Snap, then run `./scripts/release.sh`. It builds with the Developer ID identity, notarizes, staples, and writes `build/Snap-<version>.zip`. Attach that archive to a GitHub release tagged `v<version>`; **Check for Updates…** reads the latest release tag.
+Bump `CFBundleShortVersionString` and `CFBundleVersion` in `Resources/Info.plist`, quit Snap, then run `mise run publish`. It builds with the Developer ID identity, notarizes, staples, writes `build/Snap-<version>.zip`, and publishes it as GitHub release `v<version>`; **Check for Updates…** reads the latest release tag. `mise run release` stops before publishing.
 
 Window operations use Apple’s [Accessibility APIs](https://developer.apple.com/documentation/applicationservices/1460434-axuielementsetattributevalue); movement mode uses a [Quartz event tap](https://developer.apple.com/documentation/coregraphics/cgevent/tapcreate(tap:place:options:eventsofinterest:callback:userinfo:)).

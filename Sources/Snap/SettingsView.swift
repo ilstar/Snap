@@ -78,7 +78,7 @@ struct SettingsView: View {
                                 if preset.action == .layout {
                                     MiniLayout(selection: preset.selection).frame(width: 32, height: 24)
                                 } else {
-                                    Image(systemName: preset.action == .move ? "arrow.up.and.down.and.arrow.left.and.right" : "arrow.up.left.and.arrow.down.right")
+                                    Image(systemName: preset.action.symbol)
                                         .frame(width: 32, height: 24).foregroundStyle(.secondary)
                                 }
                                 VStack(alignment: .leading, spacing: 4) {
@@ -171,13 +171,11 @@ struct SettingsView: View {
                 }
             } else {
                 VStack(spacing: 16) {
-                    Image(systemName: preset.action == .move ? "arrow.up.and.down.and.arrow.left.and.right" : "arrow.up.left.and.arrow.down.right")
+                    Image(systemName: preset.action.symbol)
                         .font(.system(size: 44, weight: .light)).foregroundStyle(accent)
-                    Text(preset.action == .move ? "Make room, one arrow at a time." : "Give one window the whole screen.")
+                    Text(preset.action.headline)
                         .font(.system(size: 18, weight: .medium))
-                    Text(preset.action == .move
-                         ? "Press your shortcut, then use ↑ ↓ ← →.\nHold Shift for larger steps. Escape or Return finishes.\nSwitching apps or 30 seconds of inactivity also ends movement."
-                         : "Enter macOS full screen in its own Space.\nUse the window’s green button to exit.\nChoose Fill screen to keep the menu bar and Dock accessible.")
+                    Text(preset.action.instructions)
                         .font(.system(size: 12)).foregroundStyle(.secondary).multilineTextAlignment(.center).lineSpacing(5)
                 }.frame(maxWidth: .infinity).frame(height: 300).background(.quaternary.opacity(0.3), in: RoundedRectangle(cornerRadius: 14))
             }
@@ -196,7 +194,7 @@ struct SettingsView: View {
             HStack {
                 Label("Saved automatically", systemImage: "checkmark").font(.system(size: 11)).foregroundStyle(.secondary)
                 Spacer()
-                Button(preset.action == .move ? "Start movement" : "Apply to last window") { store.run(preset.id) }
+                Button(preset.action == .restore ? "Restore last window" : preset.action == .move ? "Start movement" : "Apply to last window") { store.run(preset.id) }
                     .buttonStyle(.borderedProminent).controlSize(.large).disabled(!store.trusted)
             }
         }
@@ -214,6 +212,38 @@ struct SettingsView: View {
             preset.selection = GridSelection(x: x, y: y, width: width, height: height)
             store.save(preset)
         }.buttonStyle(.bordered).controlSize(.small)
+    }
+}
+
+private extension PresetAction {
+    var symbol: String {
+        switch self {
+        case .layout: return "macwindow"
+        case .move: return "arrow.up.and.down.and.arrow.left.and.right"
+        case .fullScreen: return "arrow.up.left.and.arrow.down.right"
+        case .restore: return "arrow.uturn.backward"
+        }
+    }
+
+    var headline: String {
+        switch self {
+        case .layout: return ""
+        case .move: return "Make room, one arrow at a time."
+        case .fullScreen: return "Give one window the whole screen."
+        case .restore: return "Right back where you started."
+        }
+    }
+
+    var instructions: String {
+        switch self {
+        case .layout: return ""
+        case .move:
+            return "Press your shortcut, then use ↑ ↓ ← →.\nHold Shift for larger steps. Escape or Return finishes.\nSwitching apps or 30 seconds of inactivity also ends movement."
+        case .fullScreen:
+            return "Enter macOS full screen in its own Space.\nUse the window’s green button or Restore window to exit.\nChoose Fill screen to keep the menu bar and Dock accessible."
+        case .restore:
+            return "Return to the size and position before your first Snap change.\nEach window remembers its own original frame until restored.\nRestoring also leaves native full screen. History lasts until Snap quits."
+        }
     }
 }
 

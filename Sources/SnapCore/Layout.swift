@@ -48,7 +48,7 @@ public struct GridSelection: Codable, Equatable {
 }
 
 public enum PresetAction: String, Codable {
-    case layout, fullScreen, move
+    case layout, fullScreen, move, restore
 }
 
 public struct Preset: Identifiable, Codable, Equatable {
@@ -77,8 +77,21 @@ public struct Preset: Identifiable, Codable, Equatable {
             Preset(name: "Bottom half", selection: GridSelection(y: 2, width: 6, height: 2), shortcut: Shortcut(keyCode: 125, modifiers: modifiers)),
             Preset(name: "Fill screen", selection: GridSelection(width: 6), shortcut: Shortcut(keyCode: 36, modifiers: modifiers)),
             Preset(name: "Full screen", action: .fullScreen, shortcut: Shortcut(keyCode: 3, modifiers: modifiers)),
-            Preset(name: "Move window", action: .move, shortcut: Shortcut(keyCode: 46, modifiers: modifiers))
+            Preset(name: "Move window", action: .move, shortcut: Shortcut(keyCode: 46, modifiers: modifiers)),
+            restoreDefault
         ]
+    }
+
+    public static var restoreDefault: Preset {
+        Preset(name: "Restore window", action: .restore, shortcut: Shortcut(keyCode: 15, modifiers: 4096 | 2048))
+    }
+
+    /// Add the new action without changing existing layouts or claiming an occupied shortcut.
+    public static func addingRestoreIfMissing(to presets: [Preset]) -> [Preset] {
+        guard !presets.contains(where: { $0.action == .restore }) else { return presets }
+        var restore = restoreDefault
+        if presets.contains(where: { $0.shortcut == restore.shortcut }) { restore.shortcut = nil }
+        return presets + [restore]
     }
 }
 

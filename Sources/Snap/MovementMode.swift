@@ -94,7 +94,7 @@ final class MovementMode {
             let dx: CGFloat = keyCode == 123 ? -amount : keyCode == 124 ? amount : 0
             let dy: CGFloat = keyCode == 126 ? -amount : keyCode == 125 ? amount : 0
             let moved = WindowGeometry.moved(frame, dx: dx, dy: dy, within: windows.visibleScreen(for: frame))
-            try windows.setPosition(moved.origin, of: window)
+            try windows.move(window, to: moved.origin)
             resetTimeout()
         } catch { stop(); onError?(error.localizedDescription) }
     }

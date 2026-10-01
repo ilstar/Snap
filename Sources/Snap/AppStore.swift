@@ -17,12 +17,15 @@ final class AppStore: ObservableObject {
     private var permissionTimer: Timer?
     private var activationObserver: NSObjectProtocol?
     private var recording = false
+    private var restoreTask: Task<Void, Never>?
 
     init() {
         let defaults = UserDefaults.standard
         if let data = defaults.data(forKey: "presets"), let decoded = try? JSONDecoder().decode([Preset].self, from: data),
            !decoded.isEmpty, Set(decoded.map(\.id)).count == decoded.count {
-            presets = decoded.map { var preset = $0; preset.selection = preset.selection.normalized; return preset }
+            presets = Preset.addingRestoreIfMissing(to: decoded).map {
+                var preset = $0; preset.selection = preset.selection.normalized; return preset
+            }
         } else { presets = Preset.defaults }
         gap = defaults.object(forKey: "windowGap") == nil ? 8 : min(32, max(0, defaults.double(forKey: "windowGap")))
         moveStep = defaults.object(forKey: "moveStep") == nil ? 24 : min(100, max(4, defaults.double(forKey: "moveStep")))
@@ -31,7 +34,7 @@ final class AppStore: ObservableObject {
         movement.onEnd = { [weak self] in self?.moving = false }
         movement.onError = { [weak self] message in self?.report(message) }
         trusted = windows.trusted
-        registerHotkeys()
+        persist()
         let timer = Timer(timeInterval: 2, repeats: true) { [weak self] _ in
             self?.refreshPermission()
         }
@@ -85,6 +88,7 @@ final class AppStore: ObservableObject {
 
     func run(_ id: UUID) {
         guard let preset = presets.first(where: { $0.id == id }), !recording else { return }
+        restoreTask?.cancel()
         let wasMoving = moving
         movement.stop()
         message = nil
@@ -98,6 +102,14 @@ final class AppStore: ObservableObject {
                 movement.activationShortcut = preset.shortcut
                 try movement.start()
                 moving = true
+            case .restore:
+                let window = try windows.focusedWindow()
+                restoreTask = Task { @MainActor [weak self] in
+                    guard let self else { return }
+                    do { try await self.windows.restore(window) }
+                    catch is CancellationError { }
+                    catch { self.report(error.localizedDescription) }
+                }
             }
         } catch { report(error.localizedDescription) }
     }
@@ -128,6 +140,7 @@ final class AppStore: ObservableObject {
     }
 
     deinit {
+        restoreTask?.cancel()
         permissionTimer?.invalidate()
         if let activationObserver { NotificationCenter.default.removeObserver(activationObserver) }
     }

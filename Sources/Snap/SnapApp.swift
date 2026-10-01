@@ -15,6 +15,7 @@ enum SnapApp {
 
 final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMenuDelegate {
     private let store = AppStore()
+    private let updates = UpdateChecker()
     private var statusItem: NSStatusItem!
     private var settingsWindow: NSWindow?
     private var toast: NSPanel?
@@ -26,6 +27,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
         let appItem = NSMenuItem()
         let appMenu = NSMenu()
         appMenu.addItem(withTitle: "About Snap", action: #selector(showAbout), keyEquivalent: "")
+        appMenu.addItem(withTitle: "Check for Updates…", action: #selector(checkForUpdates), keyEquivalent: "")
         appMenu.addItem(.separator())
         appMenu.addItem(withTitle: "Quit Snap", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         appItem.submenu = appMenu
@@ -82,6 +84,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
         let settings = NSMenuItem(title: "Layouts & shortcuts…", action: #selector(showSettings), keyEquivalent: ",")
         settings.target = self
         menu.addItem(settings)
+        let updateItem = NSMenuItem(title: "Check for Updates…", action: #selector(checkForUpdates), keyEquivalent: "")
+        updateItem.target = self
+        menu.addItem(updateItem)
         menu.addItem(withTitle: "Quit Snap", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
     }
 
@@ -94,6 +99,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
     @objc private func stopMoving() { store.stopMoving() }
     @objc private func enableAccess() { store.requestPermission() }
     @objc private func showAbout() { NSApp.orderFrontStandardAboutPanel(nil) }
+    @objc private func checkForUpdates() { updates.checkForUpdates() }
 
     @objc private func showSettings() {
         store.stopMoving()

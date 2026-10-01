@@ -2,6 +2,12 @@
 
 A native macOS menu bar window manager, built with SwiftUI and AppKit. Requires macOS 14 or later. No third-party dependencies.
 
+## Install
+
+Download the latest `Snap-<version>.zip` from [Releases](https://github.com/ilstar/Snap/releases), unzip it, and move **Snap.app** to Applications. Release builds are signed with a Developer ID and notarized by Apple.
+
+Choose **Check for Updates…** from the menu bar icon to compare your version with the latest GitHub release. If a newer version is available, Snap opens its download page; quit Snap and replace the app to update.
+
 ## Build and run
 
 ```sh
@@ -56,6 +62,16 @@ Snapshots last for the current Snap session and are discarded for closed windows
 
 Automated tests cover grid bounds, spacing, display coordinate conversion, movement clamping, default shortcuts, preset serialization, per-window restore history, and migration of existing settings. macOS Accessibility and global keyboard behavior require a real desktop with user-granted permission. Some apps enforce minimum window sizes or do not support Accessibility window operations; Snap reports those failures. Leave native full screen before applying layouts or moving a window.
 
-The build script uses certificate signing so the app’s designated requirement can remain stable across changed builds. An ad-hoc signature identifies a particular executable hash and cannot preserve Accessibility grants after that executable changes. See Apple’s [code-signing requirements documentation](https://developer.apple.com/documentation/technotes/tn3127-inside-code-signing-requirements). The local bundle is not notarized; notarize the final bundle before distribution.
+The build script uses certificate signing so the app’s designated requirement can remain stable across changed builds. An ad-hoc signature identifies a particular executable hash and cannot preserve Accessibility grants after that executable changes. See Apple’s [code-signing requirements documentation](https://developer.apple.com/documentation/technotes/tn3127-inside-code-signing-requirements). Certificate-signed builds use the hardened runtime and a secure timestamp.
+
+## Releasing
+
+Store notarization credentials once (use an [app-specific password](https://support.apple.com/102654)):
+
+```sh
+xcrun notarytool store-credentials snap-notary --apple-id <apple-id> --team-id <team-id>
+```
+
+Bump `CFBundleShortVersionString` and `CFBundleVersion` in `Resources/Info.plist`, quit Snap, then run `./scripts/release.sh`. It builds with the Developer ID identity, notarizes, staples, and writes `build/Snap-<version>.zip`. Attach that archive to a GitHub release tagged `v<version>`; **Check for Updates…** reads the latest release tag.
 
 Window operations use Apple’s [Accessibility APIs](https://developer.apple.com/documentation/applicationservices/1460434-axuielementsetattributevalue); movement mode uses a [Quartz event tap](https://developer.apple.com/documentation/coregraphics/cgevent/tapcreate(tap:place:options:eventsofinterest:callback:userinfo:)).

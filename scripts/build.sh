@@ -39,6 +39,11 @@ cp "$bin_path/Snap" "$bundle/Contents/MacOS/Snap"
 cp Resources/Info.plist "$bundle/Contents/Info.plist"
 swift scripts/make-icon.swift "$PWD/build"
 iconutil -c icns "$PWD/build/Snap.iconset" -o "$bundle/Contents/Resources/Snap.icns"
-codesign --force --sign "$signing_identity" --identifier com.fred.snap "$bundle"
+sign_options=()
+if [[ "$signing_identity" != "-" ]]; then
+    # Hardened runtime and a secure timestamp are required for notarization.
+    sign_options=(--options runtime --timestamp)
+fi
+codesign --force --sign "$signing_identity" --identifier com.fred.snap "${sign_options[@]}" "$bundle"
 codesign --verify --deep --strict "$bundle"
 print "Built $bundle"

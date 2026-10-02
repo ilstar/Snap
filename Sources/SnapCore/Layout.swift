@@ -35,11 +35,13 @@ public struct GridSelection: Codable, Equatable {
     }
 
     /// Uses Accessibility's top-left coordinate system. Insets never collapse a grid cell.
+    /// A selection covering the whole grid fills the screen exactly; spacing only separates windows.
     public func frame(in screen: CGRect, gap: CGFloat) -> CGRect {
         let s = normalized
         let cellWidth = screen.width / CGFloat(s.columns)
         let cellHeight = screen.height / CGFloat(s.rows)
-        let inset = min(max(0, gap), min(cellWidth * CGFloat(s.width), cellHeight * CGFloat(s.height)) / 4)
+        let fillsScreen = s.width == s.columns && s.height == s.rows
+        let inset = fillsScreen ? 0 : min(max(0, gap), min(cellWidth * CGFloat(s.width), cellHeight * CGFloat(s.height)) / 4)
         return CGRect(x: screen.minX + CGFloat(s.x) * cellWidth + inset,
                       y: screen.minY + CGFloat(s.y) * cellHeight + inset,
                       width: CGFloat(s.width) * cellWidth - inset * 2,

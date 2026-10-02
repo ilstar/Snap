@@ -53,5 +53,6 @@ final class LayoutTests: XCTestCase {
         let fill = try XCTUnwrap(presets.first { $0.name == "Fill screen" })
         let screen = CGRect(x: 0, y: 25, width: 1440, height: 850)
         XCTAssertEqual(fill.selection.frame(in: screen, gap: 0), screen)
+        XCTAssertEqual(fill.selection.frame(in: screen, gap: 8), screen)
     }
 }

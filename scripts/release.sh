@@ -1,5 +1,5 @@
 #!/bin/zsh
-# Builds a Developer ID–signed, notarized, stapled Snap.app and zips it for a GitHub release.
+# Builds a Developer ID–signed, notarized, stapled Snap.app and packages it as a zip and a DMG for a GitHub release.
 # One-time setup: xcrun notarytool store-credentials snap-notary --apple-id <id> --team-id <team>
 set -euo pipefail
 cd "${0:A:h}/.."
@@ -23,4 +23,18 @@ xcrun stapler staple "$bundle"
 rm -f "$zip"
 ditto -c -k --keepParent "$bundle" "$zip"
 spctl --assess --type execute --verbose=2 "$bundle"
-print "Release archive: $zip"
+
+# The DMG holds the stapled app plus an Applications link for drag-to-install, and is notarized on its own.
+dmg="$PWD/build/Snap-$version.dmg"
+staging="$PWD/build/dmg"
+rm -rf "$staging" "$dmg"
+mkdir -p "$staging"
+ditto "$bundle" "$staging/Snap.app"
+ln -s /Applications "$staging/Applications"
+hdiutil create -volname "Snap $version" -srcfolder "$staging" -fs HFS+ -format UDZO -ov "$dmg"
+rm -rf "$staging"
+codesign --force --sign "$SNAP_SIGNING_IDENTITY" --timestamp "$dmg"
+xcrun notarytool submit "$dmg" --keychain-profile "$profile" --wait
+xcrun stapler staple "$dmg"
+spctl --assess --type open --context context:primary-signature --verbose=2 "$dmg"
+print "Release archives: $zip $dmg"

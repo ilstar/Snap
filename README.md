@@ -4,7 +4,7 @@ A native macOS menu bar window manager, built with SwiftUI and AppKit. Requires 
 
 ## Install
 
-Download the latest `Snap-<version>.zip` from [Releases](https://github.com/ilstar/Snap/releases), unzip it, and move **Snap.app** to Applications. Release builds are signed with a Developer ID and notarized by Apple.
+Download the latest `Snap-<version>.dmg` from [Releases](https://github.com/ilstar/Snap/releases), open it, and drag **Snap.app** to Applications. A `Snap-<version>.zip` is also available. Release builds are signed with a Developer ID and notarized by Apple.
 
 Choose **Check for Updates…** from the menu bar icon to compare your version with the latest GitHub release. If a newer version is available, Snap opens its download page; quit Snap and replace the app to update.
 
@@ -73,6 +73,6 @@ Store notarization credentials once (use an [app-specific password](https://supp
 xcrun notarytool store-credentials snap-notary --apple-id <apple-id> --team-id <team-id>
 ```
 
-Bump `CFBundleShortVersionString` and `CFBundleVersion` in `Resources/Info.plist`, quit Snap, then run `mise run publish`. It builds with the Developer ID identity, notarizes, staples, writes `build/Snap-<version>.zip`, and publishes it as GitHub release `v<version>`; **Check for Updates…** reads the latest release tag. `mise run release` stops before publishing.
+Bump `CFBundleShortVersionString` and `CFBundleVersion` in `Resources/Info.plist`, quit Snap, then run `mise run publish`. It builds with the Developer ID identity, notarizes, staples, writes `build/Snap-<version>.zip` and `build/Snap-<version>.dmg`, and publishes both as GitHub release `v<version>`; **Check for Updates…** reads the latest release tag. `mise run release` stops before publishing.
 
 Window operations use Apple’s [Accessibility APIs](https://developer.apple.com/documentation/applicationservices/1460434-axuielementsetattributevalue); movement mode uses a [Quartz event tap](https://developer.apple.com/documentation/coregraphics/cgevent/tapcreate(tap:place:options:eventsofinterest:callback:userinfo:)).

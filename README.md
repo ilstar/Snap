@@ -30,7 +30,7 @@ Closing the settings window leaves Snap running in the menu bar. Choose **Layout
 
 ## Layouts
 
-Select a preset and drag across its grid to choose the window area. Each preset has its own 2–12 column and row grid. Add, rename, or delete layouts, adjust spacing, and record a global shortcut. Changes are saved automatically in the app’s UserDefaults. Shortcut recording requires Control or Command; Escape cancels. Duplicate shortcuts are rejected, and unavailable registrations appear in settings.
+Select a preset and drag across its grid to choose the window area. Each preset has its own 2–12 column and row grid. Add, rename, or delete layouts, and record a global shortcut. Window spacing (default 0 pt) and movement step are app-wide settings shared by all layouts. Changes are saved automatically in the app’s UserDefaults. Shortcut recording requires Control or Command; Escape cancels. Duplicate shortcuts are rejected, and unavailable registrations appear in settings.
 
 | Action | Default shortcut |
 | --- | --- |
@@ -43,7 +43,7 @@ Select a preset and drag across its grid to choose the window area. Each preset 
 | Move window | Control–Option–M |
 | Restore window | Control–Option–R |
 
-**Fill screen** uses the current display’s usable area, excluding the menu bar and Dock, with configured spacing. Set spacing to zero to fill it exactly. **Full screen** uses macOS native full screen in its own Space; exit using the window’s green button.
+**Fill screen** uses the current display’s usable area, excluding the menu bar and Dock, exactly; window spacing never applies to it. **Full screen** uses macOS native full screen in its own Space; exit using the window’s green button.
 
 Global shortcuts act on the focused window. Menu actions and **Apply to last window** use the last external app while Snap’s settings are focused. On multiple displays, the display containing the largest portion of the window is used.
 

@@ -36,13 +36,16 @@ struct SettingsView: View {
                 }
                 Spacer(minLength: 0)
                 Divider()
-                HStack(spacing: 22) {
+                Text("GENERAL · ALL LAYOUTS").font(.system(size: 10, weight: .semibold)).tracking(1.6).foregroundStyle(.secondary)
+                HStack(alignment: .top, spacing: 22) {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Window spacing").font(.system(size: 11, weight: .medium)).foregroundStyle(.secondary)
                         HStack {
                             Slider(value: $store.gap, in: 0...32, step: 1).frame(width: 120).accessibilityLabel("Window spacing")
                             Text("\(Int(store.gap)) pt").font(.system(size: 11, design: .monospaced)).frame(width: 42)
                         }
+                        Text("Space around snapped windows.\nFill screen always uses the whole screen.")
+                            .font(.system(size: 10)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                     }
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Movement step").font(.system(size: 11, weight: .medium)).foregroundStyle(.secondary)

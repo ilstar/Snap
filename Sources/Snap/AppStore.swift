@@ -27,7 +27,7 @@ final class AppStore: ObservableObject {
                 var preset = $0; preset.selection = preset.selection.normalized; return preset
             }
         } else { presets = Preset.defaults }
-        gap = defaults.object(forKey: "windowGap") == nil ? 8 : min(32, max(0, defaults.double(forKey: "windowGap")))
+        gap = defaults.object(forKey: "windowGap") == nil ? 0 : min(32, max(0, defaults.double(forKey: "windowGap")))
         moveStep = defaults.object(forKey: "moveStep") == nil ? 24 : min(100, max(4, defaults.double(forKey: "moveStep")))
         selectedID = presets.first?.id
         hotkeys.onTrigger = { [weak self] id in self?.run(id) }

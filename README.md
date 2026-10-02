@@ -6,7 +6,7 @@ A native macOS menu bar window manager, built with SwiftUI and AppKit. Requires 
 
 Download the latest `Snap-<version>.dmg` from [Releases](https://github.com/ilstar/Snap/releases), open it, and drag **Snap.app** to Applications. A `Snap-<version>.zip` is also available. Release builds are signed with a Developer ID and notarized by Apple.
 
-Choose **Check for Updates…** from the menu bar icon to compare your version with the latest GitHub release. If a newer version is available, Snap opens its download page; quit Snap and replace the app to update.
+Choose **Check for Updates…** from the menu bar icon to compare your version with the latest GitHub release. If a newer version is available, **Install and Relaunch** downloads the release zip, verifies that it is signed by the same developer as the running app, replaces Snap in place, and relaunches it. If Snap can’t replace itself (for example, when it runs from a folder you can’t write to), it offers the download page instead.
 
 ## Build and run
 
@@ -73,6 +73,6 @@ Store notarization credentials once (use an [app-specific password](https://supp
 xcrun notarytool store-credentials snap-notary --apple-id <apple-id> --team-id <team-id>
 ```
 
-Bump `CFBundleShortVersionString` and `CFBundleVersion` in `Resources/Info.plist`, quit Snap, then run `mise run publish`. It builds with the Developer ID identity, notarizes, staples, writes `build/Snap-<version>.zip` and `build/Snap-<version>.dmg`, and publishes both as GitHub release `v<version>`; **Check for Updates…** reads the latest release tag. `mise run release` stops before publishing.
+Bump `CFBundleShortVersionString` and `CFBundleVersion` in `Resources/Info.plist`, quit Snap, then run `mise run publish`. It builds with the Developer ID identity, notarizes, staples, writes `build/Snap-<version>.zip` and `build/Snap-<version>.dmg`, and publishes both as GitHub release `v<version>`; **Check for Updates…** reads the latest release tag and installs its `.zip` asset. `mise run release` stops before publishing.
 
 Window operations use Apple’s [Accessibility APIs](https://developer.apple.com/documentation/applicationservices/1460434-axuielementsetattributevalue); movement mode uses a [Quartz event tap](https://developer.apple.com/documentation/coregraphics/cgevent/tapcreate(tap:place:options:eventsofinterest:callback:userinfo:)).

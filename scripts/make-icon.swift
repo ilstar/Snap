@@ -8,17 +8,19 @@ for size in [16, 32, 128, 256, 512] {
         let image = NSImage(size: NSSize(width: pixels, height: pixels))
         image.lockFocus()
         let unit = CGFloat(pixels) / 1024
-        NSColor(calibratedRed: 0.12, green: 0.19, blue: 0.32, alpha: 1).setFill()
+        // Matches the settings window’s app mark. AppKit draws bottom-up, so row != col lights the top-left and bottom-right tiles.
+        NSColor(srgbRed: 0xC2 / 255.0, green: 0x54 / 255.0, blue: 0x1D / 255.0, alpha: 1).setFill()
         NSBezierPath(roundedRect: NSRect(x: 50 * unit, y: 50 * unit, width: 924 * unit, height: 924 * unit),
                      xRadius: 210 * unit, yRadius: 210 * unit).fill()
-        for row in 0..<3 {
-            for col in 0..<3 {
-                let selected = col < 2 && row > 0
-                (selected ? NSColor(calibratedRed: 0.40, green: 0.75, blue: 1, alpha: 1)
-                 : NSColor(calibratedWhite: 1, alpha: 0.13)).setFill()
-                NSBezierPath(roundedRect: NSRect(x: CGFloat(190 + col * 222) * unit, y: CGFloat(190 + row * 222) * unit,
-                                                 width: 200 * unit, height: 200 * unit),
-                             xRadius: 32 * unit, yRadius: 32 * unit).fill()
+        let inset: CGFloat = 230, gap: CGFloat = 76
+        let tile = (924 - 2 * inset - gap) / 2
+        for row in 0..<2 {
+            for col in 0..<2 {
+                NSColor(calibratedWhite: 1, alpha: row != col ? 1 : 0.55).setFill()
+                NSBezierPath(roundedRect: NSRect(x: (50 + inset + CGFloat(col) * (tile + gap)) * unit,
+                                                 y: (50 + inset + CGFloat(row) * (tile + gap)) * unit,
+                                                 width: tile * unit, height: tile * unit),
+                             xRadius: 44 * unit, yRadius: 44 * unit).fill()
             }
         }
         image.unlockFocus()

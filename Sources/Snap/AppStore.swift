@@ -7,6 +7,7 @@ final class AppStore: ObservableObject {
     @Published var selectedID: UUID?
     @Published private(set) var trusted = false
     @Published private(set) var moving = false
+    @Published private(set) var recording = false
     @Published var message: String?
     @Published var shortcutFailures: [String] = []
     @Published var gap: Double { didSet { UserDefaults.standard.set(gap, forKey: "windowGap") } }
@@ -16,7 +17,6 @@ final class AppStore: ObservableObject {
     private lazy var movement = MovementMode(windows: windows)
     private var permissionTimer: Timer?
     private var activationObserver: NSObjectProtocol?
-    private var recording = false
     private var restoreTask: Task<Void, Never>?
 
     init() {
@@ -29,7 +29,7 @@ final class AppStore: ObservableObject {
         } else { presets = Preset.defaults }
         gap = defaults.object(forKey: "windowGap") == nil ? 0 : min(32, max(0, defaults.double(forKey: "windowGap")))
         moveStep = defaults.object(forKey: "moveStep") == nil ? 24 : min(100, max(4, defaults.double(forKey: "moveStep")))
-        selectedID = presets.first?.id
+        selectedID = presets.first { $0.action == .layout }?.id
         hotkeys.onTrigger = { [weak self] id in self?.run(id) }
         movement.onEnd = { [weak self] in self?.moving = false }
         movement.onError = { [weak self] message in self?.report(message) }
@@ -65,7 +65,7 @@ final class AppStore: ObservableObject {
     func deleteSelected() {
         guard let selected, selected.action == .layout, presets.filter({ $0.action == .layout }).count > 1 else { return }
         presets.removeAll { $0.id == selected.id }
-        selectedID = presets.first?.id
+        selectedID = presets.first { $0.action == .layout }?.id
         persist()
     }
 

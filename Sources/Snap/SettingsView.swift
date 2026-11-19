@@ -72,7 +72,7 @@ struct SettingsView: View {
                 Image(systemName: "rectangle.split.2x2.fill").font(.system(size: 24)).foregroundStyle(accent)
                 Text("Snap").font(.system(size: 25, weight: .bold))
             }.padding(.top, 8)
-            Text("YOUR LAYOUTS").font(.system(size: 10, weight: .semibold)).tracking(1.6).foregroundStyle(.secondary)
+            Text("LAYOUTS & ACTIONS").font(.system(size: 10, weight: .semibold)).tracking(1.6).foregroundStyle(.secondary)
             ScrollView {
                 VStack(spacing: 6) {
                     ForEach(store.presets) { preset in
@@ -225,6 +225,10 @@ private extension PresetAction {
         case .move: return "arrow.up.and.down.and.arrow.left.and.right"
         case .fullScreen: return "arrow.up.left.and.arrow.down.right"
         case .restore: return "arrow.uturn.backward"
+        case .moveScreenLeft: return "arrow.left.to.line"
+        case .moveScreenRight: return "arrow.right.to.line"
+        case .moveScreenUp: return "arrow.up.to.line"
+        case .moveScreenDown: return "arrow.down.to.line"
         }
     }
 
@@ -234,6 +238,8 @@ private extension PresetAction {
         case .move: return "Make room, one arrow at a time."
         case .fullScreen: return "Give one window the whole screen."
         case .restore: return "Right back where you started."
+        case .moveScreenLeft, .moveScreenRight, .moveScreenUp, .moveScreenDown:
+            return "Move to another display."
         }
     }
 
@@ -246,6 +252,8 @@ private extension PresetAction {
             return "Enter macOS full screen in its own Space.\nUse the window’s green button or Restore window to exit.\nChoose Fill screen to keep the menu bar and Dock accessible."
         case .restore:
             return "Return to the size and position before your first Snap change.\nEach window remembers its own original frame until restored.\nRestoring also leaves native full screen. History lasts until Snap quits."
+        case .moveScreenLeft, .moveScreenRight, .moveScreenUp, .moveScreenDown:
+            return "Use the shortcut or menu action to move the focused window in this direction.\nSnap keeps the window’s size when it fits the destination display."
         }
     }
 }

@@ -4,6 +4,7 @@ import SnapCore
 
 enum WindowError: LocalizedError {
     case permission, noWindow, unsupported, failed(AXError), fullScreen, noSavedFrame, restoreFailed
+    case noScreen, screenMoveFailed
     var errorDescription: String? {
         switch self {
         case .permission: return "Enable Snap in System Settings → Privacy & Security → Accessibility."
@@ -13,6 +14,8 @@ enum WindowError: LocalizedError {
         case .fullScreen: return "Leave native full screen before resizing or moving this window."
         case .noSavedFrame: return "No saved position for this window. Resize or move it with Snap first."
         case .restoreFailed: return "This app could not restore the saved window frame. The saved position is still available; try again."
+        case .noScreen: return "There’s no display in that direction."
+        case .screenMoveFailed: return "This app could not move its window to the destination display."
         }
     }
 }
@@ -136,6 +139,32 @@ final class WindowManager {
         guard original.origin != position else { return }
         remember(original, for: window)
         try setPosition(position, of: window)
+    }
+
+    func moveToScreen(_ direction: ScreenDirection) throws {
+        let window = try focusedWindow()
+        try checkMovable(window)
+        let original = try frame(of: window)
+        let screens = NSScreen.screens
+        let mainTop = screens.first?.frame.maxY ?? 0
+        let displays = screens.map { screen in
+            WindowDisplay(frame: WindowGeometry.accessibilityFrame(from: screen.frame, mainScreenTop: mainTop),
+                          visibleFrame: WindowGeometry.accessibilityFrame(from: screen.visibleFrame, mainScreenTop: mainTop))
+        }
+        guard let source = WindowGeometry.display(for: original, among: displays),
+              let destination = WindowGeometry.destination(from: source, toward: direction, among: displays) else {
+            throw WindowError.noScreen
+        }
+        let target = WindowGeometry.transferred(original, from: source.visibleFrame, to: destination.visibleFrame)
+        let needsResize = target.size != original.size
+        if needsResize { try checkMovable(window, resize: true) }
+        remember(original, for: window)
+        if needsResize { try setFrame(target, of: window) }
+        else { try setPosition(target.origin, of: window) }
+        let actual = try frame(of: window)
+        guard WindowGeometry.display(for: actual, among: displays) == destination else {
+            throw WindowError.screenMoveFailed
+        }
     }
 
     private func remember(_ frame: CGRect, for window: AXUIElement) {

@@ -51,6 +51,7 @@ public struct GridSelection: Codable, Equatable {
 
 public enum PresetAction: String, Codable {
     case layout, fullScreen, move, restore
+    case moveScreenLeft, moveScreenRight, moveScreenUp, moveScreenDown
 }
 
 public struct Preset: Identifiable, Codable, Equatable {
@@ -81,19 +82,33 @@ public struct Preset: Identifiable, Codable, Equatable {
             Preset(name: "Full screen", action: .fullScreen, shortcut: Shortcut(keyCode: 3, modifiers: modifiers)),
             Preset(name: "Move window", action: .move, shortcut: Shortcut(keyCode: 46, modifiers: modifiers)),
             restoreDefault
-        ]
+        ] + screenMoveDefaults
     }
 
     public static var restoreDefault: Preset {
         Preset(name: "Restore window", action: .restore, shortcut: Shortcut(keyCode: 15, modifiers: 4096 | 2048))
     }
 
-    /// Add the new action without changing existing layouts or claiming an occupied shortcut.
-    public static func addingRestoreIfMissing(to presets: [Preset]) -> [Preset] {
-        guard !presets.contains(where: { $0.action == .restore }) else { return presets }
-        var restore = restoreDefault
-        if presets.contains(where: { $0.shortcut == restore.shortcut }) { restore.shortcut = nil }
-        return presets + [restore]
+    private static var screenMoveDefaults: [Preset] {
+        // Carbon controlKey | optionKey | shiftKey.
+        let modifiers: UInt32 = 4096 | 2048 | 512
+        return [
+            Preset(name: "Move one screen left", action: .moveScreenLeft, shortcut: Shortcut(keyCode: 123, modifiers: modifiers)),
+            Preset(name: "Move one screen right", action: .moveScreenRight, shortcut: Shortcut(keyCode: 124, modifiers: modifiers)),
+            Preset(name: "Move one screen up", action: .moveScreenUp, shortcut: Shortcut(keyCode: 126, modifiers: modifiers)),
+            Preset(name: "Move one screen down", action: .moveScreenDown, shortcut: Shortcut(keyCode: 125, modifiers: modifiers))
+        ]
+    }
+
+    /// Add built-in actions without changing existing presets or claiming an occupied shortcut.
+    public static func addingMissingActions(to presets: [Preset]) -> [Preset] {
+        var result = presets
+        for var preset in [restoreDefault] + screenMoveDefaults {
+            guard !result.contains(where: { $0.action == preset.action }) else { continue }
+            if result.contains(where: { $0.shortcut == preset.shortcut }) { preset.shortcut = nil }
+            result.append(preset)
+        }
+        return result
     }
 }
 

@@ -23,7 +23,7 @@ final class AppStore: ObservableObject {
         let defaults = UserDefaults.standard
         if let data = defaults.data(forKey: "presets"), let decoded = try? JSONDecoder().decode([Preset].self, from: data),
            !decoded.isEmpty, Set(decoded.map(\.id)).count == decoded.count {
-            presets = Preset.addingRestoreIfMissing(to: decoded).map {
+            presets = Preset.addingMissingActions(to: decoded).map {
                 var preset = $0; preset.selection = preset.selection.normalized; return preset
             }
         } else { presets = Preset.defaults }
@@ -110,6 +110,10 @@ final class AppStore: ObservableObject {
                     catch is CancellationError { }
                     catch { self.report(error.localizedDescription) }
                 }
+            case .moveScreenLeft: try windows.moveToScreen(.left)
+            case .moveScreenRight: try windows.moveToScreen(.right)
+            case .moveScreenUp: try windows.moveToScreen(.up)
+            case .moveScreenDown: try windows.moveToScreen(.down)
             }
         } catch { report(error.localizedDescription) }
     }

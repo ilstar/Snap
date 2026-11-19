@@ -111,9 +111,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
         store.stopMoving()
         if settingsWindow == nil {
             let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 980, height: 820),
-                                  styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
+                                  styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
+                                  backing: .buffered, defer: false)
             window.title = "Snap — Layouts & Shortcuts"
+            window.titleVisibility = .hidden
             window.titlebarAppearsTransparent = true
+            window.appearance = NSAppearance(named: .aqua)
             window.isReleasedWhenClosed = false
             window.delegate = self
             window.contentView = NSHostingView(rootView: SettingsView(store: store))

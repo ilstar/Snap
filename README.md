@@ -2,6 +2,9 @@
 
 A native macOS menu bar window manager, built with SwiftUI and AppKit. Requires macOS 14 or later. No third-party dependencies.
 
+<img width="1092" height="932" alt="Screenshot 2026-11-18 at 9 34 45 PM" src="https://github.com/user-attachments/assets/921ffb92-fb45-429a-beda-05c16cc3857b" />
+
+
 ## Install
 
 Download the latest `Snap-<version>.dmg` from [Releases](https://github.com/ilstar/Snap/releases), open it, and drag **Snap.app** to Applications. A `Snap-<version>.zip` is also available. Release builds are signed with a Developer ID and notarized by Apple.

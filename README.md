@@ -42,6 +42,10 @@ Select a preset and drag across its grid to choose the window area. Each preset 
 | Native full screen | Control–Option–F |
 | Move window | Control–Option–M |
 | Restore window | Control–Option–R |
+| Move one screen left | Control–Option–Shift–Left |
+| Move one screen right | Control–Option–Shift–Right |
+| Move one screen up | Control–Option–Shift–Up |
+| Move one screen down | Control–Option–Shift–Down |
 
 **Fill screen** uses the current display’s usable area, excluding the menu bar and Dock, exactly; window spacing never applies to it. **Full screen** uses macOS native full screen in its own Space; exit using the window’s green button.
 
@@ -49,19 +53,23 @@ Global shortcuts act on the focused window. Menu actions and **Apply to last win
 
 ## Movement mode
 
-Focus a window and press **Control–Option–M**, then use the arrow keys. Shift multiplies the movement step by four. Escape, Return, the movement shortcut again, switching apps, or 30 seconds of inactivity ends the mode. Other keys end the mode and pass through to the active app. Movement stays inside the current display’s usable area; moving windows between displays is not included in this version.
+Focus a window and press **Control–Option–M**, then use the arrow keys. Shift multiplies the movement step by four. Escape, Return, the movement shortcut again, switching apps, or 30 seconds of inactivity ends the mode. Other keys end the mode and pass through to the active app. Movement stays inside the current display’s usable area.
+
+## Move between displays
+
+Press **Control–Option–Shift** with an arrow key, or choose **Move one screen** in the menu with the direction you want. Snap uses the display arrangement in macOS System Settings. The window keeps its relative position and shrinks only as needed to fit the destination’s usable area. If there’s no display in that direction, Snap shows a message and leaves the window in place. Customize these shortcuts in **Layouts & shortcuts…**. If a default shortcut is already assigned to another preset, the new action is added without a shortcut.
 
 ## Restore window
 
 Press **Control–Option–R** or choose **Restore window** from the menu bar to return the active window to its original size and position. For example: place a window wherever you like, use **Fill screen**, then **Restore window** to put it back.
 
-Snap saves a separate frame for each window before its first layout change, native full-screen action, or arrow movement. Further Snap changes keep that original frame until restoration succeeds. Restore also exits native full screen and ends movement mode. After a successful restore, the next Snap change captures a new starting frame. A failed restore retains the snapshot so you can retry. Snap reports when a window has no saved frame.
+Snap saves a separate frame for each window before its first layout change, native full-screen action, or move. Further Snap changes keep that original frame until restoration succeeds. Restore also exits native full screen and ends movement mode. After a successful restore, the next Snap change captures a new starting frame. A failed restore retains the snapshot so you can retry. Snap reports when a window has no saved frame.
 
 Snapshots last for the current Snap session and are discarded for closed windows and terminated apps. Existing layouts and shortcut customizations are preserved when the Restore action is added. If Control–Option–R is already assigned to another preset, Restore is added without a shortcut; record another one in settings. Apps may restrict window sizes or positions, and macOS may constrain restoration if a display has been disconnected.
 
 ## Validation and limitations
 
-Automated tests cover grid bounds, spacing, display coordinate conversion, movement clamping, default shortcuts, preset serialization, per-window restore history, and migration of existing settings. macOS Accessibility and global keyboard behavior require a real desktop with user-granted permission. Some apps enforce minimum window sizes or do not support Accessibility window operations; Snap reports those failures. Leave native full screen before applying layouts or moving a window.
+Automated tests cover grid bounds, spacing, display coordinate conversion and selection, cross-display placement, movement clamping, default shortcuts, preset serialization, per-window restore history, and migration of existing settings. macOS Accessibility and global keyboard behavior require a real desktop with user-granted permission. Some apps enforce minimum window sizes or do not support Accessibility window operations; Snap reports those failures. Leave native full screen before applying layouts or moving a window.
 
 The build script uses certificate signing so the app’s designated requirement can remain stable across changed builds. An ad-hoc signature identifies a particular executable hash and cannot preserve Accessibility grants after that executable changes. See Apple’s [code-signing requirements documentation](https://developer.apple.com/documentation/technotes/tn3127-inside-code-signing-requirements). Certificate-signed builds use the hardened runtime and a secure timestamp.
 

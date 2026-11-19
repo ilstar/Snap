@@ -48,20 +48,21 @@ final class WindowRestoreTests: XCTestCase {
         existing[0].name = "My left side"
         existing[0].selection = GridSelection(columns: 8, width: 5)
         existing[0].shortcut = nil
-        let migrated = Preset.addingRestoreIfMissing(to: existing)
+        let migrated = Preset.addingMissingActions(to: existing)
         XCTAssertEqual(Array(migrated.dropLast()), existing)
         XCTAssertEqual(migrated.last?.action, .restore)
         XCTAssertEqual(migrated.last?.shortcut, Shortcut(keyCode: 15, modifiers: 4096 | 2048))
-        XCTAssertEqual(Preset.addingRestoreIfMissing(to: migrated), migrated)
+        XCTAssertEqual(Preset.addingMissingActions(to: migrated), migrated)
         XCTAssertEqual(try JSONDecoder().decode([Preset].self, from: JSONEncoder().encode(migrated)), migrated)
     }
 
     func testMigrationDoesNotTakeAnOccupiedShortcut() {
         let existing = [Preset(name: "Custom", shortcut: Preset.restoreDefault.shortcut)]
-        let migrated = Preset.addingRestoreIfMissing(to: existing)
+        let migrated = Preset.addingMissingActions(to: existing)
         XCTAssertEqual(migrated.first, existing.first)
-        XCTAssertEqual(migrated.last?.action, .restore)
-        XCTAssertNil(migrated.last?.shortcut)
+        let restore = migrated.first { $0.action == .restore }
+        XCTAssertNotNil(restore)
+        XCTAssertNil(restore?.shortcut)
     }
 
     func testMigrationPreservesAnAlreadyCustomizedRestoreAction() {
@@ -69,6 +70,6 @@ final class WindowRestoreTests: XCTestCase {
         let index = presets.firstIndex { $0.action == .restore }!
         presets[index].name = "Go back"
         presets[index].shortcut = Shortcut(keyCode: 6, modifiers: 256 | 2048)
-        XCTAssertEqual(Preset.addingRestoreIfMissing(to: presets), presets)
+        XCTAssertEqual(Preset.addingMissingActions(to: presets), presets)
     }
 }

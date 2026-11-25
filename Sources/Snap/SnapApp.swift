@@ -51,7 +51,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
         NSApp.mainMenu = mainMenu
 
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
-        statusItem.button?.image = NSImage(systemSymbolName: "rectangle.split.2x2", accessibilityDescription: "Snap window manager")
+        statusItem.button?.image = Self.menuBarIcon()
         let menu = NSMenu()
         menu.delegate = self
         statusItem.menu = menu
@@ -59,6 +59,33 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
             self?.showError()
         }
         showSettings()
+    }
+
+    /// A template version of the app mark: a rounded square with the 2×2 tiles cut out,
+    /// the top-left and bottom-right tiles fully and the other two partly, as in the app icon.
+    private static func menuBarIcon() -> NSImage {
+        let image = NSImage(size: NSSize(width: 18, height: 18), flipped: true) { _ in
+            guard let context = NSGraphicsContext.current?.cgContext else { return false }
+            let body = NSRect(x: 1, y: 1, width: 16, height: 16)
+            NSColor.black.setFill()
+            NSBezierPath(roundedRect: body, xRadius: 4, yRadius: 4).fill()
+            let inset: CGFloat = 3.5, gap: CGFloat = 1.5
+            let tile = (body.width - 2 * inset - gap) / 2
+            context.setBlendMode(.destinationOut)
+            for row in 0..<2 {
+                for col in 0..<2 {
+                    NSColor(white: 0, alpha: row == col ? 1 : 0.55).setFill()
+                    let rect = NSRect(x: body.minX + inset + CGFloat(col) * (tile + gap),
+                                      y: body.minY + inset + CGFloat(row) * (tile + gap),
+                                      width: tile, height: tile)
+                    NSBezierPath(roundedRect: rect, xRadius: 1, yRadius: 1).fill()
+                }
+            }
+            return true
+        }
+        image.isTemplate = true
+        image.accessibilityDescription = "Snap window manager"
+        return image
     }
 
     func menuNeedsUpdate(_ menu: NSMenu) {

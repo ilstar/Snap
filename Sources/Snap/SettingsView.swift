@@ -346,7 +346,9 @@ struct SettingsView: View {
                 Spacer()
                 Text("\(Int(value.wrappedValue)) pt").font(.system(size: 12, design: .monospaced)).foregroundStyle(Theme.secondaryText)
             }
-            Slider(value: value, in: range, step: step).accessibilityLabel(title)
+            // Snap in the binding rather than passing `step:`, which draws tick marks and made the page slow to build.
+            Slider(value: Binding(get: { value.wrappedValue }, set: { value.wrappedValue = ($0 / step).rounded() * step }), in: range)
+                .accessibilityLabel(title)
             Text(note).font(.system(size: 11)).foregroundStyle(Theme.mutedText).fixedSize(horizontal: false, vertical: true)
         }.frame(maxWidth: .infinity)
     }
@@ -485,6 +487,36 @@ private struct Keycap: View {
             .frame(minWidth: large ? 28 : 22, minHeight: large ? 28 : 22)
             .background(shape.fill(.white).shadow(color: Theme.keyEdge, radius: 0, y: 1))
             .overlay(shape.strokeBorder(Theme.cardBorder))
+    }
+}
+
+/// A shortcut's keycaps drawn as one cached bitmap. Building a separate `Keycap` view per key made
+/// the Shortcuts page slow to appear, so the real views are rendered once per label and reused.
+private struct KeycapStrip: View {
+    let shortcut: Shortcut
+    let large: Bool
+    let spacing: CGFloat
+    @Environment(\.displayScale) private var scale
+
+    /// Room around the strip so the keycaps' 1 pt drop shadow is not clipped.
+    private static let bleed: CGFloat = 2
+    @MainActor private static var cache: [String: NSImage] = [:]
+
+    var body: some View {
+        Image(nsImage: image).padding(-Self.bleed).accessibilityHidden(true)
+    }
+
+    private var image: NSImage {
+        let label = ShortcutLabel.text(shortcut)
+        let key = "\(label)|\(large)|\(spacing)|\(scale)"
+        if let cached = Self.cache[key] { return cached }
+        let renderer = ImageRenderer(content: HStack(spacing: spacing) {
+            ForEach(Array(keycaps(shortcut).enumerated()), id: \.offset) { Keycap(text: $0.element, large: large) }
+        }.padding(Self.bleed).environment(\.colorScheme, .light))
+        renderer.scale = scale
+        let image = renderer.nsImage ?? NSImage()
+        Self.cache[key] = image
+        return image
     }
 }
 
@@ -644,7 +676,7 @@ struct ShortcutRecorder: View {
                 Text("Press keys… Esc cancels").font(.system(size: large ? 13 : 12, weight: .medium))
                     .foregroundStyle(SandTheme.accent).padding(.horizontal, 6)
             } else if let shortcut = preset.shortcut {
-                ForEach(Array(keycaps(shortcut).enumerated()), id: \.offset) { Keycap(text: $0.element, large: large) }
+                KeycapStrip(shortcut: shortcut, large: large, spacing: large ? 4 : 3)
             } else {
                 Text("Record shortcut").font(.system(size: large ? 13 : 12, weight: .medium))
                     .foregroundStyle(SandTheme.mutedText).padding(.horizontal, 6)
